@@ -5,42 +5,48 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Конвертер та Менеджер Документів</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">  
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
 
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #ffffff; }
+        body { font-family: 'Inter', sans-serif; background-color: #f7f9fb; }
         
         .drop-zone {
             border: 2px dashed #a0a0a0;
             border-radius: 12px;
-            transition: all 0.2s;
+            transition: all 0.3s ease-in-out;
         }
         .drop-zone.drag-over {
             border-color: #3b82f6;
-            background-color: #eff6ff;
+            background-color: #e0f2fe;
         }
         
         .field-zone {
-            border: 2px dashed #d1d5db;
-            transition: all 0.2s;
+            border: 2px dashed #9ca3af;
+            transition: all 0.3s ease-in-out;
+            cursor: default;
+        }
+        .field-zone:not(.has-file):hover {
+             border-color: #60a5fa;
+             background-color: #f0f9ff;
         }
         .field-zone.has-file {
             border-style: solid;
-            border-color: #10b981;
-            background-color: #ecfdf5;
+            border-color: #059669;
+            background-color: #f0fdf4;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
         
-        .scrollable-preview::-webkit-scrollbar { width: 6px; }
-        .scrollable-preview::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
-        .scrollable-preview::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        .scrollable-preview::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .scrollable-preview::-webkit-scrollbar { width: 8px; }
+        .scrollable-preview::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 10px; }
+        .scrollable-preview::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
+        .scrollable-preview::-webkit-scrollbar-thumb:hover { background: #64748b; }
 
         #previewContent canvas {
-            max-width: 100%;
+            max-width: 100%; 
             height: auto;
         }
     </style>
@@ -49,100 +55,100 @@
 
 <div id="app" class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
     
-    <header class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-800">Конвертер та Менеджер Документів (PDF 2.0)</h1>
-        <p class="text-gray-500">Завантажте, об'єднайте та організуйте файли для формування пакету.</p>
+    <header class="mb-10">
+        <h1 class="text-4xl font-extrabold text-gray-800 border-b pb-2 border-blue-500">Конвертер та Менеджер Документів</h1>
+        <p class="text-gray-500 mt-2 text-lg">Створіть професійний пакет документів: завантаження, об'єднання та організація.</p>
     </header>
 
-    <div class="bg-white p-6 rounded-xl shadow-lg mb-6">
+    <div class="bg-white p-6 rounded-xl shadow-2xl mb-8 border-t-4 border-blue-600">
         <div class="flex flex-col md:flex-row md:items-end md:space-x-4 space-y-4 md:space-y-0">
             <div class="flex-grow">
-                <label for="internalCode" class="block text-sm font-medium text-gray-700">Внутрішній код (Обов'язково для назви файлів)</label>
-                <input type="text" id="internalCode" placeholder="Наприклад: PROD-2024-001" 
-                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border"
+                <label for="internalCode" class="block text-sm font-semibold text-gray-700">Внутрішній код (Обов'язково для назви файлів)</label>
+                <input type="text" id="internalCode" placeholder="Наприклад: 00-00004117" 
+                        class="mt-1 block w-full rounded-lg border-gray-300 shadow-inner focus:border-blue-500 focus:ring-blue-500 p-3 border transition duration-150"
                         oninput="updateDownloadButtonState()">
             </div>
             
             <button onclick="handleZipDownload()" id="downloadZipBtn" 
-                    class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-150 disabled:opacity-50" disabled>
-                <span id="downloadText">Завантажити ZIP</span>
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-xl hover:shadow-2xl transition duration-200 transform hover:scale-[1.02] disabled:opacity-50" disabled>
+                <span id="downloadText">Завантажити ZIP-Пакет</span>
             </button>
             
             <button onclick="handleClearAll()" 
-                    class="bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-150">
+                    class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-150 transform hover:scale-[1.01]">
                 Очистити все
             </button>
         </div>
     </div>
 
-    <div id="dropZone" class="drop-zone p-10 text-center cursor-pointer mb-8"
+    <div id="dropZone" class="drop-zone p-12 text-center cursor-pointer mb-8 bg-gray-50 hover:bg-gray-100 transition duration-200 shadow-md"
             onclick="document.getElementById('fileInput').click()"
             ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
-        <svg class="mx-auto h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg class="mx-auto h-16 w-16 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
         </svg>
-        <p class="mt-1 text-sm text-gray-600">Перетягніть файли сюди або <span class="text-blue-600 font-semibold">натисніть для вибору</span></p>
-        <p class="text-xs text-gray-500">Підтримуються: .jpg, .png, .pdf, .doc, .docx та інші.</p>
+        <p class="mt-2 text-lg text-gray-700 font-semibold">Перетягніть файли сюди або <span class="text-blue-600 hover:text-blue-800 transition duration-150">натисніть для вибору</span></p>
+        <p class="text-sm text-gray-500 mt-1">Підтримуються: .jpg, .png, .pdf, .doc, .docx та інші.</p>
         <input type="file" id="fileInput" multiple accept="*/*" onchange="handleFileUpload(this.files)" class="hidden">
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-        <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg">
-            <h2 class="text-xl font-semibold mb-4 text-gray-800">Завантажені файли (<span id="fileCount">0</span>)</h2>
+        <div class="lg:col-span-2 bg-white p-8 rounded-xl shadow-2xl">
+            <h2 class="text-2xl font-bold mb-6 text-gray-800 border-b pb-3">Завантажені файли (<span id="fileCount">0</span>)</h2>
             
-            <div id="mergeControls" class="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-2 sm:space-y-0 mb-4">
+            <div id="mergeControls" class="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-3 sm:space-y-0 mb-6">
                 <div id="imageMergeControls" class="flex items-center space-x-2" style="display:none;">
-                    <button onclick="handleImageMerge()" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg shadow transition duration-150 disabled:opacity-50" id="imageMergeBtn" disabled>
+                    <button onclick="handleImageMerge()" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transform hover:scale-[1.01] transition duration-200 disabled:opacity-50" id="imageMergeBtn" disabled>
                         Об'єднати зображення у PDF
                     </button>
                     <span class="text-xs text-gray-500">(Виберіть 1+ зображення)</span>
                 </div>
 
                 <div id="pdfMergeControls" class="flex items-center space-x-2" style="display:none;">
-                    <button onclick="handlePdfMerge()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow transition duration-150 disabled:opacity-50" id="pdfMergeBtn" disabled>
+                    <button onclick="handlePdfMerge()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transform hover:scale-[1.01] transition duration-200 disabled:opacity-50" id="pdfMergeBtn" disabled>
                         Об'єднати PDF-файли
                     </button>
                     <span class="text-xs text-gray-500">(Виберіть 2+ PDF)</span>
                 </div>
             </div>
             
-            <div id="fileList" class="min-h-[200px] border border-gray-200 rounded-lg p-3 scrollable-preview max-h-[60vh] overflow-y-auto space-y-2">
+            <div id="fileList" class="min-h-[200px] border-2 border-gray-100 rounded-xl p-4 scrollable-preview max-h-[60vh] overflow-y-auto space-y-3">
                 <p id="emptyMessage" class="text-gray-400 text-center py-10">Файли ще не завантажені.</p>
             </div>
         </div>
 
-        <div class="bg-white p-6 rounded-xl shadow-lg">
-            <h2 class="text-xl font-semibold mb-4 text-gray-800">Прив'язка до полів</h2>
-            <div id="bindingFields" class="space-y-4">
+        <div class="bg-white p-8 rounded-xl shadow-2xl">
+            <h2 class="text-2xl font-bold mb-6 text-gray-800 border-b pb-3">Прив'язка до полів</h2>
+            <div id="bindingFields" class="space-y-6">
                 <div id="field_manual" data-key="manual" data-label="Інструкція" 
                     class="field-zone p-4 rounded-lg min-h-[100px]"
                     ondragover="handleFieldDragOver(event)" ondragleave="handleFieldDragLeave(event)" ondrop="handleFieldDrop(event)">
-                    <p class="font-medium text-gray-700 flex justify-between items-center">
+                    <p class="font-semibold text-gray-700 flex justify-between items-center">
                         Інструкція <span id="manualFileName" class="text-sm font-normal text-green-700"></span>
                     </p>
                     <p class="text-sm text-gray-500 mt-1">Перетягніть файл інструкції сюди.</p>
-                    <button id="manualRemoveBtn" onclick="removeBoundFile('manual')" class="text-red-500 text-xs hidden mt-2 hover:text-red-700">Видалити прив'язку</button>
+                    <button id="manualRemoveBtn" onclick="removeBoundFile('manual')" class="text-red-500 text-xs hidden mt-2 hover:text-red-700 font-medium">Видалити прив'язку</button>
                 </div>
 
                 <div id="field_specs" data-key="specs" data-label="Технічні характеристики" 
                     class="field-zone p-4 rounded-lg min-h-[100px]"
                     ondragover="handleFieldDragOver(event)" ondragleave="handleFieldDragLeave(event)" ondrop="handleFieldDrop(event)">
-                    <p class="font-medium text-gray-700 flex justify-between items-center">
+                    <p class="font-semibold text-gray-700 flex justify-between items-center">
                         Технічні характеристики <span id="specsFileName" class="text-sm font-normal text-green-700"></span>
                     </p>
                     <p class="text-sm text-gray-500 mt-1">Перетягніть файл тех. характеристик сюди.</p>
-                    <button id="specsRemoveBtn" onclick="removeBoundFile('specs')" class="text-red-500 text-xs hidden mt-2 hover:text-red-700">Видалити прив'язку</button>
+                    <button id="specsRemoveBtn" onclick="removeBoundFile('specs')" class="text-red-500 text-xs hidden mt-2 hover:text-red-700 font-medium">Видалити прив'язку</button>
                 </div>
 
                 <div id="field_certificate" data-key="certificate" data-label="Сертифікат" 
                     class="field-zone p-4 rounded-lg min-h-[100px]"
                     ondragover="handleFieldDragOver(event)" ondragleave="handleFieldDragLeave(event)" ondrop="handleFieldDrop(event)">
-                    <p class="font-medium text-gray-700 flex justify-between items-center">
+                    <p class="font-semibold text-gray-700 flex justify-between items-center">
                         Сертифікат <span id="certificateFileName" class="text-sm font-normal text-green-700"></span>
                     </p>
                     <p class="text-sm text-gray-500 mt-1">Перетягніть файл сертифікату сюди.</p>
-                    <button id="certificateRemoveBtn" onclick="removeBoundFile('certificate')" class="text-red-500 text-xs hidden mt-2 hover:text-red-700">Видалити прив'язку</button>
+                    <button id="certificateRemoveBtn" onclick="removeBoundFile('certificate')" class="text-red-500 text-xs hidden mt-2 hover:text-red-700 font-medium">Видалити прив'язку</button>
                 </div>
             </div>
         </div>
@@ -168,6 +174,7 @@
 
 
 <script>
+
     let uploadedFiles = [];
     let boundFiles = {}; 
     let nextFileId = 1;
@@ -189,11 +196,11 @@
         
         textEl.textContent = text;
         box.classList.remove('hidden');
-        setTimeout(() => box.classList.remove('opacity-0'), 10);
+        setTimeout(() => box.classList.remove('opacity-0'), 10); 
         
         setTimeout(() => {
             box.classList.add('opacity-0');
-            setTimeout(() => box.classList.add('hidden'), 300);
+            setTimeout(() => box.classList.add('hidden'), 300); 
         }, duration);
     }
     
@@ -241,13 +248,13 @@
                 <div id="file-${file.id}" 
                     data-file-id="${file.id}" 
                     data-file-type="${isImg ? 'image' : (isPDF ? 'pdf' : 'other')}"
-                    class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg shadow-sm hover:bg-gray-100 ${opacity} transition duration-100"
+                    class="flex items-center space-x-3 p-3 bg-gray-50 rounded-xl shadow-sm hover:bg-gray-100 ${opacity} transition duration-100 border border-gray-100"
                     ${draggable}
                     ondragstart="handleDragStart(event, ${file.id})"
                     ondragend="handleDragEnd(event)">
                     
                     <!-- Чекбокс тільки для зображень/PDF -->
-                    ${isSelectable ? `<input type="checkbox" id="check-${file.id}" data-file-id="${file.id}" onchange="checkMergeControls()" class="w-4 h-4 text-orange-600 bg-gray-100 border-gray-300 rounded focus:ring-orange-500">` : '<span class="w-4 h-4"></span>'}
+                    ${isSelectable ? `<input type="checkbox" id="check-${file.id}" data-file-id="${file.id}" onchange="checkMergeControls()" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">` : '<span class="w-4 h-4"></span>'}
                     
                     ${getFileIcon(file.type)}
                     
@@ -262,7 +269,7 @@
                     </button>
                     
                     <button onclick="removeFile(${file.id})" 
-                            class="text-red-500 hover:text-red-700 transition duration-150 p-1 rounded">
+                            class="text-red-500 hover:text-red-700 transition duration-150 p-1 rounded hover:bg-red-50">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                     </button>
                 </div>
@@ -386,7 +393,6 @@
         const fieldKey = e.currentTarget.dataset.key;
 
         if (fileId && fieldKey) {
-
             for (const key in boundFiles) {
                 if (boundFiles[key] === fileId) {
                     boundFiles[key] = null; 
@@ -406,7 +412,7 @@
         renderBoundFields();
         showMessage(`Прив'язку видалено з поля "${fieldLabel}".`, 2500);
     }
-
+    
     async function renderPdfToCanvas(pdfBlob, containerEl) {
         containerEl.innerHTML = '<div class="text-center py-8"><div class="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500 mx-auto"></div><p class="text-gray-600 mt-2">Завантаження PDF...</p></div>';
         
@@ -423,15 +429,18 @@
 
             for (let i = 1; i <= pdfDocument.numPages; i++) {
                 const page = await pdfDocument.getPage(i);
+                
                 const viewport = page.getViewport({ scale: 1 });
                 const desiredWidth = 850; 
                 const scale = desiredWidth / viewport.width;
                 const scaledViewport = page.getViewport({ scale: scale });
+
                 const canvas = document.createElement('canvas');
                 const canvasContext = canvas.getContext('2d');
                 canvas.height = scaledViewport.height;
                 canvas.width = scaledViewport.width;
                 canvas.className = 'my-4 border border-gray-200 rounded-lg shadow-md';
+
                 const pageContainer = document.createElement('div');
                 pageContainer.className = 'flex flex-col mb-6 w-full'; 
                 pageContainer.innerHTML = `<p class="text-xs text-gray-500 mb-1 text-center">Сторінка ${i}</p>`;
@@ -492,7 +501,7 @@
         
         contentEl.innerHTML = ''; 
     }
-
+    
     async function handlePdfMerge() {
         if (!window.PDFLib) return showMessage('Помилка: Бібліотека PDFLib не завантажена.', 5000);
         
@@ -507,18 +516,17 @@
 
         const pdfsToMerge = selectedPdfIds.map(id => uploadedFiles.find(f => f.id === id)).filter(Boolean);
 
-        const newPdfDoc = await PDFLib.PDFDocument.create();
-        let mergeSuccess = true;
-
         const originalBtnText = document.getElementById('pdfMergeBtn').textContent;
         document.getElementById('pdfMergeBtn').textContent = 'Обробка...';
         document.getElementById('pdfMergeBtn').disabled = true;
+
+        const newPdfDoc = await PDFLib.PDFDocument.create();
+        let mergeSuccess = true;
 
         for (const file of pdfsToMerge) {
             try {
                 const pdfBytes = await file.file.arrayBuffer();
                 const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
-                
                 const copiedPages = await newPdfDoc.copyPages(pdfDoc, pdfDoc.getPageIndices());
                 copiedPages.forEach((page) => newPdfDoc.addPage(page));
 
@@ -537,8 +545,6 @@
         
         const mergedPdfBytes = await newPdfDoc.save();
         const mergedPdfBlob = new Blob([mergedPdfBytes], { type: 'application/pdf' });
-        
-
         const newFileName = `merged_${new Date().toISOString().slice(0, 10)}.pdf`;
         
         uploadedFiles.push({
@@ -636,11 +642,11 @@
             name: newFileName,
             type: 'application/pdf',
             size: pdfBlob.size,
-            file: pdfBlob,
+            file: pdfBlob, 
         });
 
         uploadedFiles = uploadedFiles.filter(f => !selectedImageIds.includes(f.id));
-        
+
         Object.keys(boundFiles).forEach(key => {
             if (selectedImageIds.includes(boundFiles[key])) {
                 boundFiles[key] = null;
@@ -651,7 +657,7 @@
         renderFileList();
         showMessage(`Успішно конвертовано/об'єднано ${selectedImageIds.length} зображень у ${newFileName}!`, 5000);
     }
-    
+
     async function handleZipDownload() {
         if (!window.JSZip) return showMessage('Помилка: Бібліотека JSZip не завантажена.', 5000);
 
@@ -668,6 +674,8 @@
             'specs': 'Технічні характеристики',
             'certificate': 'Сертифікат'
         };
+        
+        const cleanInternalCode = internalCode.toLowerCase().replace(/[^a-z0-9\-]/g, '-').replace(/-+/g, '-');
 
         Object.keys(boundFiles).forEach(key => {
             const fileId = boundFiles[key];
@@ -675,10 +683,13 @@
                 const file = uploadedFiles.find(f => f.id === fileId);
                 if (file) {
                     const originalExt = file.name.split('.').pop();
-                    const newFileName = `${internalCode}-${key}-${fieldMap[key]}.${originalExt}`
+                    const rawLabel = fieldMap[key];
+                    const cleanLabel = rawLabel.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '-');
+                    
+                    const newFileName = `${key}-${cleanInternalCode}-${cleanLabel}.${originalExt}`
                                             .toLowerCase()
-                                            .replace(/[^a-z0-9\-\.]/g, '_')
-                                            .replace(/__+/g, '_');
+                                            .replace(/[^a-z0-9\-\.]/g, '_') 
+                                            .replace(/__+/g, '_'); 
                     
                     filesToZip.push({ 
                         file: file.file, 
@@ -709,7 +720,7 @@
 
         try {
             const zipBlob = await zip.generateAsync({ type: "blob" });
-            const zipFileName = `${internalCode}_package.zip`;
+            const zipFileName = `${cleanInternalCode}_package.zip`;
             const url = URL.createObjectURL(zipBlob);
             const a = document.createElement('a');
             a.href = url;
@@ -725,7 +736,7 @@
             console.error("Помилка створення ZIP:", error);
             showMessage('Помилка: Не вдалося створити ZIP-архів.', 5000);
         } finally {
-            document.getElementById('downloadText').textContent = 'Завантажити ZIP';
+            document.getElementById('downloadText').textContent = 'Завантажити ZIP-Пакет';
             updateDownloadButtonState();
         }
     }
