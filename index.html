@@ -12,38 +12,84 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
 
     <style>
-        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #0d1b2a, #1b263b); }
-        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at top, #0f172a, #020617);
+            color: #e5e7eb;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
         .drop-zone {
-            border: 2px dashed rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            transition: all 0.3s ease-in-out;
-        }
-        .drop-zone.drag-over {
-            border-color: #3b82f6;
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 16px;
             background: rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
         }
-        
+
+        .drop-zone:hover {
+            border-color: #60a5fa;
+            background: rgba(96, 165, 250, 0.15);
+        }
+
+        .drop-zone.drag-over {
+            border-color: #60a5fa;
+            background: rgba(96, 165, 250, 0.15);
+        }
+
         .field-zone {
-            border: 2px dashed #9ca3af;
-            transition: all 0.3s ease-in-out;
-            cursor: default;
+            border: 2px dashed rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.04);
+            transition: all 0.3s ease;
         }
+
         .field-zone:not(.has-file):hover {
-             border-color: #60a5fa;
-             background: rgba(255, 255, 255, 0.05);
+            border-color: #60a5fa;
+            background: rgba(96, 165, 250, 0.1);
         }
+
         .field-zone.has-file {
             border-style: solid;
-            border-color: #059669;
-            background-color: #f0fdf4;
-            background: rgba(255, 255, 255, 0.05);
+            border-color: #34d399;
+            background: rgba(16, 185, 129, 0.12);
         }
-        
-        .scrollable-preview::-webkit-scrollbar { width: 8px; }
-        .scrollable-preview::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 10px; }
-        .scrollable-preview::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
-        .scrollable-preview::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+        .scrollable-preview::-webkit-scrollbar {
+            width: 8px;
+        }
+        .scrollable-preview::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .scrollable-preview::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.35);
+            border-radius: 10px;
+        }
+
+        .file-card {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 14px;
+        }
+
+        #previewModal {
+            background: rgba(2, 6, 23, 0.9);
+        }
+
+        input {
+            background: rgba(255, 255, 255, 0.08) !important;
+            color: #e5e7eb !important;
+            border-color: rgba(255, 255, 255, 0.2) !important;
+        }
+
+        input::placeholder {
+            color: #9ca3af;
+        }
 
         #previewContent canvas {
             max-width: 100%; 
@@ -56,14 +102,14 @@
 <div id="app" class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
     
     <header class="mb-10">
-        <h1 class="text-4xl font-extrabold text-white-800 border-b pb-2 border-blue-500">Конвертер та Менеджер Документів</h1>
-        <p class="text-white-500 mt-2 text-lg">Створіть професійний пакет документів: завантаження, об'єднання та організація.</p>
+        <h1 class="text-4xl font-extrabold text-white border-b pb-2 border-blue-500">Конвертер та Менеджер Документів</h1>
+        <p class="text-white mt-2 text-lg">Створіть професійний пакет документів: завантаження, об'єднання та організація.</p>
     </header>
 
-    <div class="bg-white p-6 rounded-xl shadow-2xl mb-8 border-t-4 border-blue-600">
+    <div class="glass p-6 rounded-xl mb-8 border-t-4 border-blue-500">
         <div class="flex flex-col md:flex-row md:items-end md:space-x-4 space-y-4 md:space-y-0">
             <div class="flex-grow">
-                <label for="internalCode" class="block text-sm font-semibold text-gray-700">Внутрішній код (Обов'язково для назви файлів)</label>
+                <label for="internalCode" class="block text-sm font-semibold text-white">Внутрішній код (Обов'язково для назви файлів)</label>
                 <input type="text" id="internalCode" placeholder="Наприклад: 00-00004117" 
                         class="mt-1 block w-full rounded-lg border-gray-300 shadow-inner focus:border-blue-500 focus:ring-blue-500 p-3 border transition duration-150"
                         oninput="updateDownloadButtonState()">
@@ -81,73 +127,73 @@
         </div>
     </div>
 
-    <div id="dropZone" class="drop-zone p-12 text-center cursor-pointer mb-8 bg-gray-50 hover:bg-gray-100 transition duration-200 shadow-md"
+    <div id="dropZone" class="drop-zone p-12 text-center cursor-pointer mb-8 glass p-8 rounded-xl transition duration-200 shadow-md"
             onclick="document.getElementById('fileInput').click()"
             ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
-        <svg class="mx-auto h-16 w-16 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg class="mx-auto h-16 w-16 text-white-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
         </svg>
-        <p class="mt-2 text-lg text-gray-700 font-semibold">Перетягніть файли сюди або <span class="text-blue-600 hover:text-blue-800 transition duration-150">натисніть для вибору</span></p>
-        <p class="text-sm text-gray-500 mt-1">Підтримуються: .jpg, .png, .pdf, .doc, .docx та інші.</p>
+        <p class="mt-2 text-lg text-white-700 font-semibold">Перетягніть файли сюди або <span class="text-blue-600 hover:text-blue-800 transition duration-150">натисніть для вибору</span></p>
+        <p class="text-sm text-white-500 mt-1">Підтримуються: .jpg, .png, .pdf, .doc, .docx та інші.</p>
         <input type="file" id="fileInput" multiple accept="*/*" onchange="handleFileUpload(this.files)" class="hidden">
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-        <div class="lg:col-span-2 bg-white p-8 rounded-xl shadow-2xl">
-            <h2 class="text-2xl font-bold mb-6 text-gray-800 border-b pb-3">Завантажені файли (<span id="fileCount">0</span>)</h2>
+        <div class="lg:col-span-2 glass p-8 rounded-xl">
+            <h2 class="text-2xl font-bold mb-6 text-white-800 border-b pb-3">Завантажені файли (<span id="fileCount">0</span>)</h2>
             
             <div id="mergeControls" class="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-3 sm:space-y-0 mb-6">
                 <div id="imageMergeControls" class="flex items-center space-x-2" style="display:none;">
                     <button onclick="handleImageMerge()" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transform hover:scale-[1.01] transition duration-200 disabled:opacity-50" id="imageMergeBtn" disabled>
                         Об'єднати зображення у PDF
                     </button>
-                    <span class="text-xs text-gray-500">(Виберіть 1+ зображення)</span>
+                    <span class="text-xs text-white-500">(Виберіть 1+ зображення)</span>
                 </div>
 
                 <div id="pdfMergeControls" class="flex items-center space-x-2" style="display:none;">
                     <button onclick="handlePdfMerge()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transform hover:scale-[1.01] transition duration-200 disabled:opacity-50" id="pdfMergeBtn" disabled>
                         Об'єднати PDF-файли
                     </button>
-                    <span class="text-xs text-gray-500">(Виберіть 2+ PDF)</span>
+                    <span class="text-xs text-white-500">(Виберіть 2+ PDF)</span>
                 </div>
             </div>
             
             <div id="fileList" class="min-h-[200px] border-2 border-gray-100 rounded-xl p-4 scrollable-preview max-h-[60vh] overflow-y-auto space-y-3">
-                <p id="emptyMessage" class="text-gray-400 text-center py-10">Файли ще не завантажені.</p>
+                <p id="emptyMessage" class="text-white-400 text-center py-10">Файли ще не завантажені.</p>
             </div>
         </div>
 
-        <div class="bg-white p-8 rounded-xl shadow-2xl">
-            <h2 class="text-2xl font-bold mb-6 text-gray-800 border-b pb-3">Прив'язка до полів</h2>
+        <div class="glass p-8 rounded-xl">
+            <h2 class="text-2xl font-bold mb-6 text-white-800 border-b pb-3">Прив'язка до полів</h2>
             <div id="bindingFields" class="space-y-6">
                 <div id="field_manual" data-key="manual" data-label="Інструкція" 
                     class="field-zone p-4 rounded-lg min-h-[100px]"
                     ondragover="handleFieldDragOver(event)" ondragleave="handleFieldDragLeave(event)" ondrop="handleFieldDrop(event)">
-                    <p class="font-semibold text-gray-700 flex justify-between items-center">
+                    <p class="font-semibold text-white-700 flex justify-between items-center">
                         Інструкція <span id="manualFileName" class="text-sm font-normal text-green-700"></span>
                     </p>
-                    <p class="text-sm text-gray-500 mt-1">Перетягніть файл інструкції сюди.</p>
+                    <p class="text-sm text-white-500 mt-1">Перетягніть файл інструкції сюди.</p>
                     <button id="manualRemoveBtn" onclick="removeBoundFile('manual')" class="text-red-500 text-xs hidden mt-2 hover:text-red-700 font-medium">Видалити прив'язку</button>
                 </div>
 
                 <div id="field_specs" data-key="specs" data-label="Технічні характеристики" 
                     class="field-zone p-4 rounded-lg min-h-[100px]"
                     ondragover="handleFieldDragOver(event)" ondragleave="handleFieldDragLeave(event)" ondrop="handleFieldDrop(event)">
-                    <p class="font-semibold text-gray-700 flex justify-between items-center">
+                    <p class="font-semibold text-white-700 flex justify-between items-center">
                         Технічні характеристики <span id="specsFileName" class="text-sm font-normal text-green-700"></span>
                     </p>
-                    <p class="text-sm text-gray-500 mt-1">Перетягніть файл тех. характеристик сюди.</p>
+                    <p class="text-sm text-white-500 mt-1">Перетягніть файл тех. характеристик сюди.</p>
                     <button id="specsRemoveBtn" onclick="removeBoundFile('specs')" class="text-red-500 text-xs hidden mt-2 hover:text-red-700 font-medium">Видалити прив'язку</button>
                 </div>
 
                 <div id="field_certificate" data-key="certificate" data-label="Сертифікат" 
                     class="field-zone p-4 rounded-lg min-h-[100px]"
                     ondragover="handleFieldDragOver(event)" ondragleave="handleFieldDragLeave(event)" ondrop="handleFieldDrop(event)">
-                    <p class="font-semibold text-gray-700 flex justify-between items-center">
+                    <p class="font-semibold text-white-700 flex justify-between items-center">
                         Сертифікат <span id="certificateFileName" class="text-sm font-normal text-green-700"></span>
                     </p>
-                    <p class="text-sm text-gray-500 mt-1">Перетягніть файл сертифікату сюди.</p>
+                    <p class="text-sm text-white-200 mt-1">Перетягніть файл сертифікату сюди.</p>
                     <button id="certificateRemoveBtn" onclick="removeBoundFile('certificate')" class="text-red-500 text-xs hidden mt-2 hover:text-red-700 font-medium">Видалити прив'язку</button>
                 </div>
             </div>
@@ -156,10 +202,10 @@
 </div>
 
 <div id="previewModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden items-center justify-center p-4 z-50" onclick="closePreviewModal()">
-    <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden" onclick="event.stopPropagation()">
+    <div class="glass p-8 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden" onclick="event.stopPropagation()">
         <div class="flex justify-between items-center border-b p-4">
-            <h3 id="previewTitle" class="text-lg font-semibold text-gray-800">Попередній перегляд</h3>
-            <button onclick="closePreviewModal()" class="text-gray-400 hover:text-gray-600">
+            <h3 id="previewTitle" class="text-lg font-semibold text-white-800">Попередній перегляд</h3>
+            <button onclick="closePreviewModal()" class="text-white-400 hover:text-white-600">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
         </div>
