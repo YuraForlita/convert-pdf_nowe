@@ -15,13 +15,13 @@
         body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #0d1b2a, #1b263b); }
         
         .drop-zone {
-            border: 2px dashed #a0a0a0;
+            border: 2px dashed rgba(255, 255, 255, 0.1);
             border-radius: 12px;
             transition: all 0.3s ease-in-out;
         }
         .drop-zone.drag-over {
             border-color: #3b82f6;
-            background-color: #e0f2fe;
+            background: rgba(255, 255, 255, 0.05);
         }
         
         .field-zone {
@@ -31,13 +31,13 @@
         }
         .field-zone:not(.has-file):hover {
              border-color: #60a5fa;
-             background-color: #f0f9ff;
+             background: rgba(255, 255, 255, 0.05);
         }
         .field-zone.has-file {
             border-style: solid;
             border-color: #059669;
             background-color: #f0fdf4;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            background: rgba(255, 255, 255, 0.05);
         }
         
         .scrollable-preview::-webkit-scrollbar { width: 8px; }
